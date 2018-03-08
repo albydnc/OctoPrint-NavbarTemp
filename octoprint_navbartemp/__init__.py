@@ -84,7 +84,7 @@ class NavBarPlugin(octoprint.plugin.StartupPlugin,
                 p = run("/opt/vc/bin/vcgencmd measure_temp", stdout=Capture())
             elif self.isNano:
                 p = run("cat /sys/class/hwmon/hwmon0/device/temp_label", stdout=Capture())
-                self._logger.info("temp = %s C" % p)
+                self._logger.info("NanoPi temperature %s=" % p.stdout.text)
             if p.returncode==1:
                 self.isAwinner = False
                 self.isRaspi = False
