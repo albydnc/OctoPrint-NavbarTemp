@@ -18,6 +18,7 @@ class NavBarPlugin(octoprint.plugin.StartupPlugin,
     def __init__(self):
         self.isRaspi = False
         self.isAwinner = False
+        self.isNano = False
         self.piSocTypes = (["BCM2708", "BCM2709", "BCM2835"]) #Array of raspberry pi SoC's to check against, saves having a large if/then statement later
         self.debugMode = False      # to simulate temp on Win/Mac
         self.displayRaspiTemp = True
@@ -45,11 +46,17 @@ class NavBarPlugin(octoprint.plugin.StartupPlugin,
             elif match.group(1) == 'Allwinner':
                 self._logger.info("Awinner detected")
                 self.isAwinner = True
+            elif match.group(1) == 'NANOPI3':
+                self._logger.info("NANOPI3 detected")
+                self.isAwinner = True
 
             if self.isRaspi and self.displayRaspiTemp:
                 self._logger.debug("Let's start RepeatedTimer!")
                 self.startTimer(30.0)
             if self.isAwinner and self.displayRaspiTemp:
+                self._logger.debug("Let's start RepeatedTimer!")
+                self.startTimer(30.0)
+            if self.isNano and self.displayRaspiTemp:
                 self._logger.debug("Let's start RepeatedTimer!")
                 self.startTimer(30.0)
         #debug mode doesn't work if the OS is linux on a regular pc
@@ -70,11 +77,13 @@ class NavBarPlugin(octoprint.plugin.StartupPlugin,
         self._logger.debug("Checking Raspberry Pi internal temperature")
         #do we really need to check platform == linux2? aren't these only called if the device has already
         #been determined to be compatible?
-        if sys.platform == "linux2": 
+        if sys.platform == "linux2":
             if self.isAwinner:
                 p = run("cat /etc/armbianmonitor/datasources/soctemp", stdout=Capture()) #this assumes an armbian OS, not sure if there's a universal way to check allwinner SoC temps on every possible OS
             elif self.isRaspi:
                 p = run("/opt/vc/bin/vcgencmd measure_temp", stdout=Capture())
+            elif self.isNano:
+                p = run("cat /sys/class/hwmon/hwmon0/device/temp_label", stdout=Capture())
             if p.returncode==1:
                 self.isAwinner = False
                 self.isRaspi = False
@@ -94,7 +103,7 @@ class NavBarPlugin(octoprint.plugin.StartupPlugin,
             match = re.search('=(.*)\'', p)
         elif self.isAwinner:
             match = re.search('(\d+)', p)
-        
+
         if not match:
             self.isRaspi = False
             self.isAwinner = False
@@ -104,7 +113,7 @@ class NavBarPlugin(octoprint.plugin.StartupPlugin,
             else:
                 temp = match.group(1)
             self._logger.debug("match: %s" % temp)
-            self._plugin_manager.send_plugin_message(self._identifier, dict(israspi=self.isRaspi,isawinner=self.isAwinner, raspitemp=temp))
+            self._plugin_manager.send_plugin_message(self._identifier, dict(israspi=self.isRaspi,isawinner=self.isAwinner,isnano=self.isNano, raspitemp=temp))
 
 
 	##~~ SettingsPlugin
@@ -130,7 +139,7 @@ class NavBarPlugin(octoprint.plugin.StartupPlugin,
 
 	##~~ TemplatePlugin API
     def get_template_configs(self):
-        if self.isRaspi or self.isAwinner:
+        if self.isRaspi or self.isAwinner or self.isNano:
             return [
                 dict(type="settings", template="navbartemp_settings_raspi.jinja2")
             ]
@@ -143,7 +152,7 @@ class NavBarPlugin(octoprint.plugin.StartupPlugin,
             "js": ["js/navbartemp.js"],
             "css": ["css/navbartemp.css"],
             "less": ["less/navbartemp.less"]
-        } 
+        }
 
     ##~~ Softwareupdate hook
     def get_update_information(self):
@@ -154,18 +163,18 @@ class NavBarPlugin(octoprint.plugin.StartupPlugin,
 
                 # version check: github repository
                 type="github_release",
-                user="ntoff",
+                user="albydnc",
                 repo="OctoPrint-NavbarTemp",
                 current=self._plugin_version,
 
                 # update method: pip w/ dependency links
-                pip="https://github.com/ntoff/OctoPrint-NavbarTemp/archive/{target_version}.zip"
+                pip="https://github.com/albydnc/OctoPrint-NavbarTemp/archive/{target_version}.zip"
             )
         )
 
-__plugin_name__ = "Navbar Temperature Plugin (ntoff mod)"
-__plugin_author__ = "Jarek Szczepanski (modified by ntoff)"
-__plugin_url__ = "https://github.com/ntoff/OctoPrint-NavbarTemp"
+__plugin_name__ = "Navbar Temperature Plugin (albydnc mod)"
+__plugin_author__ = "Jarek Szczepanski (modified by albydnc)"
+__plugin_url__ = "https://github.com/albydnc/OctoPrint-NavbarTemp"
 
 def __plugin_load__():
 	global __plugin_implementation__
