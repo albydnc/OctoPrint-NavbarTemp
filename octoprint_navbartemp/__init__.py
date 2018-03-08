@@ -48,7 +48,7 @@ class NavBarPlugin(octoprint.plugin.StartupPlugin,
                 self.isAwinner = True
             elif match.group(1) == 'NANOPI3':
                 self._logger.info("NANOPI3 detected")
-                self.isAwinner = True
+                self.isNano = True
 
             if self.isRaspi and self.displayRaspiTemp:
                 self._logger.debug("Let's start RepeatedTimer!")
@@ -84,7 +84,7 @@ class NavBarPlugin(octoprint.plugin.StartupPlugin,
                 p = run("/opt/vc/bin/vcgencmd measure_temp", stdout=Capture())
             elif self.isNano:
                 p = run("cat /sys/class/hwmon/hwmon0/device/temp_label", stdout=Capture())
-                self._logger.info("NanoPi temperature %s=" % p.stdout.text)
+
             if p.returncode==1:
                 self.isAwinner = False
                 self.isRaspi = False
