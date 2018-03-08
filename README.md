@@ -1,8 +1,7 @@
 # Plugin for OctoPrint - displays temperatures on navbar
 
 Changed in my version:
-* Added detection for Armbian OS on Allwinner SoC (specifically a PCDuino3b).
-* Reworded some stuff to be less specific to raspberry pi's (changed raspi to SoC, etc)
+*Added nanopi compatibility over DietPi
 
 (Screenshots are from the standard version)
 
@@ -17,4 +16,4 @@ For Raspberry Pi users it's possible to display internal temperature (configurab
 ## Setup
 My modified version isn't available in the plugin repository, manual setup is required using this URL:
 
-    https://github.com/ntoff/OctoPrint-NavbarTemp/archive/master.zip
+    https://github.com/albydnc/OctoPrint-NavbarTemp/archive/master.zip
