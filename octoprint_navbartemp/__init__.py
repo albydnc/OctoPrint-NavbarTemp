@@ -104,7 +104,8 @@ class NavBarPlugin(octoprint.plugin.StartupPlugin,
             match = re.search('=(.*)\'', p)
         elif self.isAwinner:
             match = re.search('(\d+)', p)
-
+        elif self.isNano:
+            match = re.search('(\d+)', p)
         if not match:
             self.isRaspi = False
             self.isAwinner = False
@@ -113,7 +114,7 @@ class NavBarPlugin(octoprint.plugin.StartupPlugin,
                 temp = float(match.group(1))/1000
             else:
                 temp = match.group(1)
-            self._logger.debug("match: %s" % temp)
+            self._logger.info("match: %s" % temp)
             self._plugin_manager.send_plugin_message(self._identifier, dict(israspi=self.isRaspi,isawinner=self.isAwinner,isnano=self.isNano, raspitemp=temp))
 
 
